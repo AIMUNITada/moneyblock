@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お金のマインドブロック診断テスト</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght @300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .progress-bar { transition: width 0.3s ease; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">💰 お金のマインドブロック診断テスト</h1>
+            <p class="text-blue-100">起業家のあなたの「お金の思い込み」を診断します</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="fade-in">
+            <div class="bg-white rounded-xl card-shadow p-8 text-center">
+                <div class="text-6xl mb-6">🎯</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">診断を始めましょう</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    10個の質問に答えて、あなたの「お金のマインドブロック」レベルを診断します。<br>
+                    正直な気持ちで回答してくださいね。
+                </p>
+                <button onclick="startTest()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors pulse-animation">
+                    診断スタート ✨
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Screen -->
+        <div id="testScreen" class="hidden">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-600">進捗</span>
+                    <span class="text-sm font-medium text-purple-600" id="progressText">1/10</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full progress-bar" id="progressBar" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-xl card-shadow p-8 fade-in">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-4" id="questionIcon">💭</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4" id="questionText"></h3>
+                </div>
+
+                <div class="space-y-3" id="answerOptions">
+                    <!-- Answer options will be inserted here -->
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button onclick="previousQuestion()" id="prevBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-6 rounded-lg transition-colors disabled:opacity-50" disabled>
+                        ← 前へ
+                    </button>
+                    <button onclick="nextQuestion()" id="nextBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors disabled:opacity-50" disabled>
+                        次へ →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Screen -->
+        <div id="registrationScreen" class="hidden">
+            <div class="bg-white rounded-xl card-shadow p-8 fade-in">
+                <div class="text-center mb-6">
+                    <div class="text-5xl mb-4">📝</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">診断完了！</h2>
+                    <p class="text-gray-600">結果を見るために、お名前とメールアドレスを入力してください</p>
+                </div>
+
+                <form id="registrationForm" class="max-w-md mx-auto">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">お名前 *</label>
+                        <input type="text" id="userName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="山田太郎">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">メールアドレス *</label>
+                        <input type="email" id="userEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="example @email.com">
+                        <div id="emailError" class="text-red-500 text-sm mt-1 hidden">正しいメールアドレスを入力してください</div>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        診断結果を見る 🎉
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <div class="bg-white rounded-xl card-shadow p-8 fade-in">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4" id="resultIcon"></div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">診断結果</h2>
+                    <div class="text-4xl font-bold text-purple-600 mb-2" id="totalScore"></div>
+                    <div class="text-xl font-semibold text-gray-700" id="resultType"></div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">📋 あなたのタイプ</h3>
+                    <p class="text-gray-700 leading-relaxed" id="resultDescription"></p>
+                </div>
+
+                <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">💡 アドバイス</h3>
+                    <p class="text-gray-700 leading-relaxed" id="resultAdvice"></p>
+                </div>
+
+                <div class="bg-green-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">🎯 今すぐできるアクション</h3>
+                    <p class="text-gray-700 leading-relaxed" id="resultAction"></p>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg p-6 text-center">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">📚 さらに詳しく学びたい方へ</h3>
+                    <p class="text-gray-700 mb-4">お金のマインドブロックを根本から解除する無料メルマガ講座をご用意しています</p>
+                    <a href="https://my928p.com/p/r/5jDGyqWH" target="_blank" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        無料メルマガ講座に参加する 📧
+                    </a>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button onclick="restartTest()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        もう一度診断する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div id="adminPanel" class="hidden mt-8">
+            <div class="bg-white rounded-xl card-shadow p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">管理者パネル</h2>
+                    <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                        データエクスポート
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2 text-left">日時</th>
+                                <th class="px-4 py-2 text-left">お名前</th>
+                                <th class="px-4 py-2 text-left">メールアドレス</th>
+                                <th class="px-4 py-2 text-left">スコア</th>
+                                <th class="px-4 py-2 text-left">タイプ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test data and state
+        const questions = [
+            {
+                text: "自分のサービスや商品に値段をつけるとき、「本当にこの価格でいいのかな…」と迷うことがある。",
+                icon: "💰"
+            },
+            {
+                text: "お客様に価格を伝えるとき、つい申し訳なさそうな声になってしまう。",
+                icon: "😅"
+            },
+            {
+                text: "「高い」と言われるのが怖くて、値下げや割引をしてしまったことがある。",
+                icon: "😰"
+            },
+            {
+                text: "自分のサービスに「こんな値段をもらっていいのだろうか？」と罪悪感を感じることがある。",
+                icon: "😔"
+            },
+            {
+                text: "新しい学びや設備など、自己投資をしたいけど「今はお金を使うべきじゃないかも…」と迷ってしまう。",
+                icon: "🤔"
+            },
+            {
+                text: "「お金の話」をすると、相手に嫌われるのでは…と不安になる。",
+                icon: "😟"
+            },
+            {
+                text: "お金の管理や経費のことになると、後回しにしたくなる。",
+                icon: "📊"
+            },
+            {
+                text: "将来、安定して稼げるかどうか、ずっと不安がある。",
+                icon: "🌅"
+            },
+            {
+                text: "「友だち価格」や「無料」でサービスを提供したことがある。",
+                icon: "🤝"
+            },
+            {
+                text: "他の人と自分の価格や売上を比べて、落ち込んでしまうことがある。",
+                icon: "📈"
+            }
+        ];
+
+        const answerOptions = [
+            { text: "よくある", value: 3, color: "bg-red-100 hover:bg-red-200 border-red-300" },
+            { text: "たまにある", value: 2, color: "bg-orange-100 hover:bg-orange-200 border-orange-300" },
+            { text: "あまりない", value: 1, color: "bg-yellow-100 hover:bg-yellow-200 border-yellow-300" },
+            { text: "まったくない", value: 0, color: "bg-green-100 hover:bg-green-200 border-green-300" }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let userData = {};
+
+        // Initialize test
+        function startTest() {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('testScreen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionIcon').textContent = question.icon;
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('progressText').textContent = `${currentQuestion + 1}/10`;
+            document.getElementById('progressBar').style.width = `${((currentQuestion + 1) / 10) * 100}%`;
+
+            // Create answer options
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+
+            answerOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = `w-full p-4 text-left border-2 rounded-lg transition-all ${option.color} ${answers[currentQuestion] === option.value ? 'ring-2 ring-purple-500' : ''}`;
+                button.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">${option.text}</span>
+                        <span class="text-sm text-gray-600">${option.value}点</span>
+                    </div>
+                `;
+                button.onclick = () => selectAnswer(option.value);
+                optionsContainer.appendChild(button);
+            });
+
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').disabled = answers[currentQuestion] === undefined;
+        }
+
+        function selectAnswer(value) {
+            answers[currentQuestion] = value;
+            document.getElementById('nextBtn').disabled = false;
+            showQuestion(); // Refresh to show selection
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showRegistration();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function showRegistration() {
+            document.getElementById('testScreen').classList.add('hidden');
+            document.getElementById('registrationScreen').classList.remove('hidden');
+        }
+
+        // Registration form handling
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            
+            // Email validation
+            const emailRegex = /^[^\\s @]+ @[^\\s @]+\\. [^\\s @]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('emailError').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('emailError').classList.add('hidden');
+            
+            userData = { name, email };
+            saveUserData();
+            showResults();
+        });
+
+        function showResults() {
+            const totalScore = answers.reduce((sum, score) => sum + score, 0);
+            const result = getResultType(totalScore);
+            
+            document.getElementById('registrationScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            document.getElementById('resultIcon').textContent = result.icon;
+            document.getElementById('totalScore').textContent = `${totalScore}点`;
+            document.getElementById('resultType').textContent = result.type;
+            document.getElementById('resultDescription').textContent = result.description;
+            document.getElementById('resultAdvice').textContent = result.advice;
+            document.getElementById('resultAction').textContent = result.action;
+        }
+
+        function getResultType(score) {
+            if (score <= 7) {
+                return {
+                    type: "マインドブロック：ほぼなし",
+                    icon: "🌟",
+                    description: "素晴らしいです！あなたはお金に対して健全なマインドセットを持っています。自分の価値を適切に評価し、堂々と価格設定ができているようですね。",
+                    advice: "現在の良い状態を維持しながら、さらなる成長を目指しましょう。時々、自分の価値観を見直して、より高い価値提供ができるよう意識してみてください。",
+                    action: "今の価格設定を見直して、提供価値に見合った適正価格になっているか確認してみましょう。"
+                };
+            } else if (score <= 17) {
+                return {
+                    type: "マインドブロック：ややあり",
+                    icon: "🌱",
+                    description: "お金に対して少し遠慮がちな傾向があります。自分の価値を認めることに、まだ少し抵抗があるかもしれません。でも大丈夫、改善の余地は十分あります。",
+                    advice: "まずは小さなステップから始めましょう。自分が提供している価値を具体的に書き出し、それに見合った対価を受け取ることは当然の権利だと認識することが大切です。",
+                    action: "今週中に、自分のサービスの価値を5つ書き出してみましょう。そして、その価値に見合った価格設定を検討してみてください。"
+                };
+            } else {
+                return {
+                    type: "マインドブロック：強め",
+                    icon: "🔄",
+                    description: "お金に対するマインドブロックがかなり強い状態です。自分の価値を過小評価し、適正な対価を受け取ることに強い抵抗を感じているようです。",
+                    advice: "まずは自分の思考パターンに気づくことから始めましょう。お金は価値交換の手段であり、あなたが提供する価値に対する正当な対価です。罪悪感を手放し、堂々と価値を提供する意識を育てていきましょう。",
+                    action: "毎日5分間、「私は価値ある人間で、適正な対価を受け取る権利がある」と声に出して言ってみましょう。また、成功している起業家の本を1冊読んでみてください。"
+                };
+            }
+        }
+
+        // Data storage (localStorage for demo - in production, use proper backend)
+        function saveUserData() {
+            const totalScore = answers.reduce((sum, score) => sum + score, 0);
+            const result = getResultType(totalScore);
+            
+            const data = {
+                timestamp: new Date().toISOString(),
+                name: userData.name,
+                email: userData.email,
+                score: totalScore,
+                type: result.type,
+                answers: answers
+            };
+            
+            // Save to localStorage (in production, send to backend)
+            let savedData = JSON.parse(localStorage.getItem('diagnosticData') || '[]');
+            savedData.push(data);
+            localStorage.setItem('diagnosticData', JSON.stringify(savedData));
+            
+            // In production, you would send this data to your backend:
+            // sendToBackend(data);
+        }
+
+        // Admin functions
+        function showAdmin() {
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadAdminData();
+        }
+
+        function loadAdminData() {
+            const data = JSON.parse(localStorage.getItem('diagnosticData') || '[]');
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(entry => {
+                const row = document.createElement('tr');
+                row.className = 'border-b';
+                row.innerHTML = `
+                    <td class="px-4 py-2">${new Date(entry.timestamp).toLocaleString('ja-JP')}</td>
+                    <td class="px-4 py-2">${entry.name}</td>
+                    <td class="px-4 py-2">${entry.email}</td>
+                    <td class="px-4 py-2">${entry.score}点</td>
+                    <td class="px-4 py-2">${entry.type}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function exportData() {
+            const data = JSON.parse(localStorage.getItem('diagnosticData') || '[]');
+            const csv = [
+                ['日時', 'お名前', 'メールアドレス', 'スコア', 'タイプ'],
+                ...data.map(entry => [
+                    new Date(entry.timestamp).toLocaleString('ja-JP'),
+                    entry.name,
+                    entry.email,
+                    entry.score,
+                    entry.type
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'diagnostic_data.csv';
+            link.click();
+        }
+
+        function restartTest() {
+            currentQuestion = 0;
+            answers = [];
+            userData = {};
+            
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            
+            // Reset form
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+        }
+
+        // Admin access (type "admin" in console to show admin panel)
+        window.admin = showAdmin;
+
+        // Sample backend integration code (commented out for demo)
+        /*
+        async function sendToBackend(data) {
+            try {
+                // Google Sheets API example
+                const response = await fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                // Firebase example
+                // const response = await fetch('YOUR_FIREBASE_URL/diagnostics.json', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify(data)
+                // });
+                
+                if (!response.ok) {
+                    throw new Error('データの保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+                // Handle error appropriately
+            }
+        }
+        */
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9753dabd7666fd4a',t:'MTc1NjIxNjgxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
